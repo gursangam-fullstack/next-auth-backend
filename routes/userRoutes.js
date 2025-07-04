@@ -3,11 +3,12 @@ const { userRegistration, verifyTempUser, userLogin, userProfile, userLogout, us
 const { accessTokenAutoRefresh } = require('../middlewares/accessTokenAutoRefresh');
 const passport = require('passport');
 const userRouter = express.Router();
+const otpLimiter =  require('../utils/otpLimiter');
 
 // Public Routes
-userRouter.post('/signup', userRegistration)
-userRouter.post('/verify-otp', verifyTempUser)
-userRouter.post('/login', userLogin)
+userRouter.post('/signup', otpLimiter,userRegistration)
+userRouter.post('/verify-otp',otpLimiter, verifyTempUser)
+userRouter.post('/login', otpLimiter,userLogin)
 userRouter.post('/forgot-password-send-otp', accessTokenAutoRefresh, passport.authenticate('jwt', { session: false }), userForgotPasswordOtpSender)
 userRouter.post('/verify-forgot-password-otp', accessTokenAutoRefresh, passport.authenticate('jwt', { session: false }), userVerifyForgotPasswordOtp)
 

@@ -8,10 +8,20 @@ const tempUser = require('../model/tempUser');
 const { generateTokens } = require("../utils/generateTokens");
 const { setTokensCookies } = require("../utils/setTokensCookies");
 const userRefreshTokenModel = require('../model/userRefreshToken');
+const { userRegistrationSchema } = require("../validations/authValidation");
+const formatZodError = require("../utils/formatZodError");
 
 // user registration
 exports.userRegistration = async (req, res) => {
-    const { name, email, mobile, password } = req.body;
+const validationResult = userRegistrationSchema.safeParse(req.body);
+    if (!validationResult.success) {
+        const messages = formatZodError(validationResult.error);
+const combinedMessage = messages.join(', ');
+return sendResponse(res, combinedMessage, 400, false);
+    }
+    
+    //const { name, email, mobile, password } = userRegistrationSchema.parse(req.body);
+const { name, email, mobile, password } = validationResult.data;
 
     try {
 
@@ -35,7 +45,7 @@ exports.userRegistration = async (req, res) => {
             { upsert: true, new: true }
         );
 
-        // console.log(`OTP for ${email}: ${otp} ${name}`);
+        console.log(`OTP for ${email}: ${otp} ${name}`);
 
         sendEmailFun({
             to: email,
@@ -48,6 +58,7 @@ exports.userRegistration = async (req, res) => {
 
         return sendResponse(res, "OTP sent successfully", 200, true);
     } catch (err) {
+       
         // console.error("Error in user registration:", err);
         return sendResponse(res, "Unable to register please try again later", 500, false);
     }
