@@ -14,11 +14,7 @@ const formatZodError = require("../utils/formatZodError");
 // user registration
 exports.userRegistration = async (req, res) => {
 const validationResult = userRegistrationSchema.safeParse(req.body);
-    if (!validationResult.success) {
-        const messages = formatZodError(validationResult.error);
-const combinedMessage = messages.join(', ');
-return sendResponse(res, combinedMessage, 400, false);
-    }
+  
     
     //const { name, email, mobile, password } = userRegistrationSchema.parse(req.body);
 const { name, email, mobile, password } = validationResult.data;
