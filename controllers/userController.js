@@ -13,11 +13,11 @@ const formatZodError = require("../utils/formatZodError");
 
 // user registration
 exports.userRegistration = async (req, res) => {
-const validationResult = userRegistrationSchema.safeParse(req.body);
+
   
     
     //const { name, email, mobile, password } = userRegistrationSchema.parse(req.body);
-const { name, email, mobile, password } = validationResult.data;
+const { name, email, mobile, password } = req.body;
 
     try {
 
