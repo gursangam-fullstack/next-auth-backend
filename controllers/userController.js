@@ -8,16 +8,11 @@ const tempUser = require('../model/tempUser');
 const { generateTokens } = require("../utils/generateTokens");
 const { setTokensCookies } = require("../utils/setTokensCookies");
 const userRefreshTokenModel = require('../model/userRefreshToken');
-const { userRegistrationSchema } = require("../validations/authValidation");
-const formatZodError = require("../utils/formatZodError");
 
 // user registration
-exports.userRegistration = async (req, res) => {
-const validationResult = userRegistrationSchema.safeParse(req.body);
-  
+exports.userRegistration = async (req, res) => 
     
-    //const { name, email, mobile, password } = userRegistrationSchema.parse(req.body);
-const { name, email, mobile, password } = validationResult.data;
+    const { name, email, mobile, password } = req.body;
 
     try {
 
