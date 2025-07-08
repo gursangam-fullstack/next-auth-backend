@@ -9,7 +9,6 @@ const { generateTokens } = require("../utils/generateTokens");
 const { setTokensCookies } = require("../utils/setTokensCookies");
 const userRefreshTokenModel = require('../model/userRefreshToken');
 const { userRegistrationSchema } = require("../validations/authValidation");
-const formatZodError = require("../utils/formatZodError");
 
 // user registration
 exports.userRegistration = async (req, res) => {

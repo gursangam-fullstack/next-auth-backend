@@ -1,40 +1,17 @@
-// // middlewares/validate.js
-// const formatZodError = require('../utils/formatZodError'); // adjust path as needed
+const sendResponse = require("../utils/sendResponse");
 
-// const validate = (schema) => (req, res, next) => {
-//   const result = schema.safeParse(req.body);
-//   if (!result.success) {
-//     const messages = formatZodError(result.error);
-//     const combinedMessage = messages.join(', ');
-//     return res.status(400).json({
-//       success: false,
-//       message: combinedMessage,
-//     });
-//   }
-
-//   req.validatedData = result.data; // attach parsed & validated data to request
-//   next();
-// };
-
-// module.exports = validate;
-
-const formatZodError = require('../utils/formatZodError');
-
-const validate = (schema) => (req, res, next) => {
-  const result = schema.safeParse(req.body);
-  
-  if (!result.success) {
-    const messages = formatZodError(result.error);
-    const combinedMessage = messages.join(', ');
-    return res.status(400).json({
-      success: false,
-      message: combinedMessage,
-    });
-  }
-
-  req.body = result.data; // ✅ overwrite body with validated version
-  next();
+const validateMiddleware = (schema) => async (req, res, next) => {
+    try {
+        const parsedBody = await schema.parseAsync(req.body);
+        req.body = parsedBody;
+        next();
+    } catch (err) {
+        const message = err.errors?.[0]?.message || "Invalid input data";
+        return sendResponse(res, message, 400, false);
+    }
 };
 
-module.exports = validate;
+module.exports = validateMiddleware;
+
+
 

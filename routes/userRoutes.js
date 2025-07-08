@@ -1,12 +1,12 @@
 const express = require('express');
 const { userRegistration, verifyTempUser, userLogin, userProfile, userLogout, userChangePassword, userForgotPasswordOtpSender, userVerifyForgotPasswordOtp } = require('../controllers/userController');
-const {  LoginFormSchema, changePasswordSchema ,forgotPasswordOtpSchema,verifyForgotPasswordOtpSchema} = require('../validations/authValidation')
+const {userRegistrationSchema,LoginFormSchema, changePasswordSchema ,forgotPasswordOtpSchema,verifyForgotPasswordOtpSchema} = require('../validations/authValidation')
 const { accessTokenAutoRefresh } = require('../middlewares/accessTokenAutoRefresh');
 const passport = require('passport');
 const userRouter = express.Router();
 const otpLimiter =  require('../utils/otpLimiter');
 const validate = require ('../middlewares/validate');
-const { userRegistrationSchema } = require('../validations/authValidation');
+
 // Public Routes
 userRouter.post('/signup',validate(userRegistrationSchema),otpLimiter,userRegistration)
 userRouter.post('/verify-otp',otpLimiter, verifyTempUser)

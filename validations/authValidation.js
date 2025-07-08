@@ -1,6 +1,6 @@
 const { z } = require("zod");
 const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
-const userRegistration =z.object({
+const userRegistrationSchema =z.object({
     name : z
     .string()
     .min(3, " Name must be atleast 3 characters long")
@@ -31,20 +31,7 @@ const userRegistration =z.object({
 
 
 
-// const LoginFormSchema = z.object({
-//     email: z
-//         .string()
-//         .email("Invalid email address")
-//         .nonempty("Email is required"),
 
-//     password: z
-//         .string()
-//         .min(8, "Password must be at least 8 characters long")
-//         .regex(
-//             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&_])[A-Za-z\d@$!%*?#&_]{8,}$/,
-//             "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
-//         )
-//         .nonempty("Password is required"),
 const LoginFormSchema = z.object({
 email: z
     .string({
@@ -115,8 +102,9 @@ const verifyForgotPasswordOtpSchema = z.object({
 });
 
 module.exports = {
-  userRegistrationSchema :userRegistration,
+ // userRegistrationSchema :userRegistration,
 
+userRegistrationSchema,
   LoginFormSchema,
   changePasswordSchema,
   forgotPasswordOtpSchema,
