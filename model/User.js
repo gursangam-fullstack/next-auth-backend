@@ -15,9 +15,15 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
-        trim: true
+        required: false,
+        trim: true,
+        // new code added
+        default :null
     },
+    googleId: {
+    type: String,
+    default: null,
+  },
     isVerified: {
         type: Boolean,
         default: false
@@ -29,6 +35,4 @@ const userSchema = new mongoose.Schema({
     }
 })
 
-const UserModel = mongoose.model("user", userSchema)
 
-module.exports = UserModel;

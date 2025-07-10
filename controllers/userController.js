@@ -9,7 +9,8 @@ const { generateTokens } = require("../utils/generateTokens");
 const { setTokensCookies } = require("../utils/setTokensCookies");
 const userRefreshTokenModel = require('../model/userRefreshToken');
 const { userRegistrationSchema } = require("../validations/authValidation");
-
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 // user registration
 exports.userRegistration = async (req, res) => {
 
@@ -257,3 +258,68 @@ exports.userVerifyForgotPasswordOtp = async (req, res) => {
 // profile of logged in user
 // send password reset email
 // user logout
+
+
+exports.googleLogin = async (req, res) => {
+  const { idToken } = req.body;
+  console.log("🧪 Received ID Token:", idToken?.substring(0, 50) + "...");
+  if (!idToken) {
+     console.log("⛔ No token provided");
+    return sendResponse(res, "idToken is required", 400, false);
+  }
+
+  try {
+    // Verify Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+ console.log("✅ Token verified. Payload:", payload);
+    const userInfo = {
+      name: payload.name,
+      email: payload.email,
+      googleId: payload.sub,
+    };
+
+    // Check if user exists
+    let user = await UserModel.findOne({ email: userInfo.email });
+
+    // If not, create user with no password (Google login only)
+    if (!user) {
+      user = await UserModel.create({
+        name: userInfo.name,
+        email: userInfo.email,
+        password: null,
+        isVerified: true,
+        googleId: userInfo.googleId,
+      });
+      console.log("🆕 New user created in DB:", user);
+    }
+
+    // Generate tokens
+    const tokens = await generateTokens(user);
+    const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = tokens;
+
+    // Set cookies
+    setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);
+
+    return sendResponse(res, "Google login successful", 200, true, {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        roles: user.role[0],
+      },
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      access_token_exp: accessTokenExp,
+      is_auth: true,
+    });
+
+  } catch (error) {
+    console.error("Google login error:", error.message);
+    return sendResponse(res, "Invalid or expired Google token", 401, false);
+  }
+};
