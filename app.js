@@ -8,7 +8,6 @@ const passport = require('passport');
 const userRouter = require("./routes/userRoutes");
 require('./config/passport-jwt-strategy')
 
-const { refreshTokenEndpoint, autoRefreshMiddleware } = require('./utils/authUtils');
 const app = express();
 
 const port = process.env.port
@@ -28,16 +27,6 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions));
-
-// app.use(cors({
-//   origin: "http://localhost:3000", 
-//   credentials: true               
-// }));
-
-// app.use(autoRefreshMiddleware);
-//app.post('/api/refresh-token', refreshTokenEndpoint);
-
-
 
 connectDb(DATABASE_URL)
 app.use(express.json())
