@@ -1,6 +1,6 @@
 const express = require('express');
 const { userRegistration, verifyTempUser, userLogin, userProfile, userLogout, userChangePassword, userForgotPasswordOtpSender, userVerifyForgotPasswordOtp, googleLogin } = require('../controllers/userController');
-const { userRegistrationSchema, LoginFormSchema, changePasswordSchema, forgotPasswordOtpSchema, verifyForgotPasswordOtpSchema } = require('../validations/authValidation')
+const { userRegistrationSchema, LoginFormSchema, changePasswordSchema, forgotPasswordOtpSchema, verifyForgotPasswordOtpSchema, otpSchema, verifyUserOtpSchema } = require('../validations/authValidation')
 const { accessTokenAutoRefresh } = require('../middlewares/accessTokenAutoRefresh');
 const passport = require('passport');
 const userRouter = express.Router();
@@ -10,7 +10,7 @@ const authorizeRole = require('../middlewares/authorizeRole');
 
 // Public Routes
 userRouter.post('/signup', validate(userRegistrationSchema), otpLimiter, userRegistration)
-userRouter.post('/verify-otp', otpLimiter, verifyTempUser)
+userRouter.post('/verify-otp', validate(verifyUserOtpSchema), otpLimiter, verifyTempUser)
 userRouter.post('/login', validate(LoginFormSchema), otpLimiter, userLogin)
 userRouter.post('/forgot-password-send-otp', accessTokenAutoRefresh, passport.authenticate('jwt', { session: false }), validate(forgotPasswordOtpSchema), userForgotPasswordOtpSender)
 userRouter.post('/verify-forgot-password-otp', accessTokenAutoRefresh, passport.authenticate('jwt', { session: false }), validate(verifyForgotPasswordOtpSchema), userVerifyForgotPasswordOtp)

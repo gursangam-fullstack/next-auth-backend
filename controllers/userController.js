@@ -116,10 +116,7 @@ exports.userLogin = async (req, res) => {
         //send success response with tokens
         return sendResponse(res, "Login Successfully", 200, true,
             {
-                user: { id: user._id, email: user.email, name: user.name, roles: user.role[0] },
-                access_token: accessToken,
-                refresh_token: refreshToken,
-                access_token_exp: accessTokenExp,
+                user: { id: user._id, email: user.email, name: user.name, mobile: user.mobile },
                 is_auth: true
             }
         )
