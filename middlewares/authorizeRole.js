@@ -10,9 +10,8 @@ const authorizeRole = (...allowedRoles) => {
       });
     }
 
-    // Support both string and array for user roles
+    // Ensure we check all roles, not just the first
     const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
-
     const hasRole = rolesArray.some(role => allowedRoles.includes(role));
     if (!hasRole) {
       return res.status(403).json({
