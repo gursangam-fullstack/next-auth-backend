@@ -28,7 +28,6 @@ exports.verifyRefreshToken = async (refreshToken) => {
             error: false,
             message: "valid refresh token"
         }
-
     }
     catch (error) {
         console.error("JWT verification failed:", error.message);

@@ -30,6 +30,15 @@ exports.setTokensCookies = (
       expires: refreshTokenExpDate, // This was the bug!
     });
 
+    // Set is_auth cookie (not httpOnly, accessible to JS)
+    res.cookie("is_auth", true, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+      expires: refreshTokenExpDate,
+    });
+
     console.log("setTokensCookies: Cookies set successfully");
   } catch (error) {
     console.error("Error setting cookies:", error);
