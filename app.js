@@ -16,23 +16,23 @@ const DATABASE_URL = process.env.MONGO_URL
 
 const allowedOrigins = process.env.FRONTEND_HOST
 
-// const corsOptions = {
-//     origin: (origin, callback) => {
-//         if (!origin || allowedOrigins.includes(origin)) {
-//             callback(null, true);
-//         } else {
-//             callback(new Error("Not allowed by CORS"));
-//         }
-//     },
-//     credentials: true
-// }
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}
 
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
-app.use(cors({
-  origin: "http://localhost:3000", 
-  credentials: true               
-}));
+// app.use(cors({
+//   origin: "http://localhost:3000", 
+//   credentials: true               
+// }));
 
 // app.use(autoRefreshMiddleware);
 //app.post('/api/refresh-token', refreshTokenEndpoint);

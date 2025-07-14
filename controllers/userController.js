@@ -131,7 +131,7 @@ exports.userLogin = async (req, res) => {
         })
 
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         sendResponse(res, "Unable to Login please try again later", 500, false)
     }
 }
@@ -157,29 +157,32 @@ exports.userLogout = async (req, res) => {
 
 // change password
 exports.userChangePassword = async (req, res) => {
-    try {
-        const { password, password_confirmation } = req.body;
+  try {
+    console.log("Change password request body:", req.body);
+    console.log("Authenticated user ID:", req.user?._id);
 
-        if (password !== password_confirmation) {
-            return sendResponse(res, "New Password and Confirm New Password don't match")
-        }
+    const { password, password_confirmation } = req.body;
 
-        const salt = await bcrypt.genSalt(Number(process.env.SALT));
-        const newHashedPassword = await bcrypt.hash(password, salt);
-
-        await UserModel.findByIdAndUpdate(req.user._id, {
-            $set: {
-                password: newHashedPassword
-            }
-        })
-
-        return sendResponse(res, "Password changed successfully", 200, true)
-
-    } catch (error) {
-        console.log(error);
-        return sendResponse(res, "Unable to Change Password please try again later", 500, false)
+    if (password !== password_confirmation) {
+      return sendResponse(res, "New Password and Confirm New Password don't match");
     }
-}
+
+    const salt = await bcrypt.genSalt(Number(process.env.SALT || 10));
+    const newHashedPassword = await bcrypt.hash(password, salt);
+
+    await UserModel.findByIdAndUpdate(req.user._id, {
+      $set: {
+        password: newHashedPassword,
+      },
+    });
+
+    return sendResponse(res, "Password changed successfully", 200, true);
+  } catch (error) {
+    console.error("Error in userChangePassword:", error);
+    return sendResponse(res, "Unable to Change Password please try again later", 500, false);
+  }
+};
+
 
 //userprofile
 exports.userProfile = async (req, res) => {
