@@ -8,22 +8,15 @@ const tempUser = require('../model/tempUser');
 const { generateTokens } = require("../utils/generateTokens");
 const { setTokensCookies } = require("../utils/setTokensCookies");
 const userRefreshTokenModel = require('../model/userRefreshToken');
-const { userRegistrationSchema } = require("../validations/authValidation");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
+
 // user registration
 exports.userRegistration = async (req, res) => {
-
-  
-    
-    //const { name, email, mobile, password } = userRegistrationSchema.parse(req.body);
-const { name, email, mobile, password } = req.body;
+    const { name, email, mobile, password } = req.body;
 
     try {
-
-        if (!name || !email || !password) {
-            return sendResponse(res, "all fields are required", 400, false)
-        }
 
         const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
@@ -54,7 +47,6 @@ const { name, email, mobile, password } = req.body;
 
         return sendResponse(res, "OTP sent successfully", 200, true);
     } catch (err) {
-       
         // console.error("Error in user registration:", err);
         return sendResponse(res, "Unable to register please try again later", 500, false);
     }
@@ -76,7 +68,7 @@ exports.verifyTempUser = async (req, res) => {
             return sendResponse(res, "Invalid or expired OTP", 400, false);
         }
 
-        const newUser = await new UserModel({
+        await new UserModel({
             name: tempUserData.name,
             email: tempUserData.email,
             mobile: tempUserData.mobile,
@@ -122,13 +114,15 @@ exports.userLogin = async (req, res) => {
         setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);
 
         //send success response with tokens
-        return sendResponse(res, "Login Successfully", 200, true, {
-            user: { id: user._id, email: user.email, name: user.name, roles: user.role[0] },
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            access_token_exp: accessTokenExp,
-            is_auth: true
-        })
+        return sendResponse(res, "Login Successfully", 200, true,
+            {
+                user: { id: user._id, email: user.email, name: user.name, roles: user.role[0] },
+                access_token: accessToken,
+                refresh_token: refreshToken,
+                access_token_exp: accessTokenExp,
+                is_auth: true
+            }
+        )
 
     } catch (error) {
         console.log(error);
@@ -157,38 +151,33 @@ exports.userLogout = async (req, res) => {
 
 // change password
 exports.userChangePassword = async (req, res) => {
-  try {
-    console.log("Change password request body:", req.body);
-    console.log("Authenticated user ID:", req.user?._id);
+    try {
+        // console.log("Change password request body:", req.body);
+        // console.log("Authenticated user ID:", req.user?._id);
 
-    const { password, password_confirmation } = req.body;
+        const { password } = req.body;
 
-    if (password !== password_confirmation) {
-      return sendResponse(res, "New Password and Confirm New Password don't match");
+        // if (password !== password_confirmation) {
+        //     return sendResponse(res, "New Password and Confirm New Password don't match");
+        // }
+
+        const salt = await bcrypt.genSalt(Number(process.env.SALT || 10));
+        const newHashedPassword = await bcrypt.hash(password, salt);
+
+        await UserModel.findByIdAndUpdate(req.user._id, {
+            $set: {
+                password: newHashedPassword,
+            },
+        });
+
+        return sendResponse(res, "Password changed successfully", 200, true);
+    } catch (error) {
+        console.error("Error in userChangePassword:", error);
+        return sendResponse(res, "Unable to Change Password please try again later", 500, false);
     }
-
-    const salt = await bcrypt.genSalt(Number(process.env.SALT || 10));
-    const newHashedPassword = await bcrypt.hash(password, salt);
-
-    await UserModel.findByIdAndUpdate(req.user._id, {
-      $set: {
-        password: newHashedPassword,
-      },
-    });
-
-    return sendResponse(res, "Password changed successfully", 200, true);
-  } catch (error) {
-    console.error("Error in userChangePassword:", error);
-    return sendResponse(res, "Unable to Change Password please try again later", 500, false);
-  }
 };
 
-
-//userprofile
-exports.userProfile = async (req, res) => {
-    res.send({ "user": req.user })
-}
-
+// forget password
 exports.userForgotPasswordOtpSender = async (req, res) => {
     // console.log("forgotPasswordOtpSender",req.body)
     try {
@@ -223,6 +212,7 @@ exports.userForgotPasswordOtpSender = async (req, res) => {
     }
 };
 
+//verify forget password
 exports.userVerifyForgotPasswordOtp = async (req, res) => {
     try {
         const { email, otp, newPassword, confirmPassword } = req.body;
@@ -253,76 +243,72 @@ exports.userVerifyForgotPasswordOtp = async (req, res) => {
     }
 };
 
-// user registration
-// user Email Verification
-// user login
-// get new access token or refresh token
-// change password
-// profile of logged in user
-// send password reset email
-// user logout
-
-
+//google login 
 exports.googleLogin = async (req, res) => {
-  const { idToken } = req.body;
-  console.log("🧪 Received ID Token:", idToken?.substring(0, 50) + "...");
-  if (!idToken) {
-     console.log("⛔ No token provided");
-    return sendResponse(res, "idToken is required", 400, false);
-  }
-
-  try {
-    // Verify Google ID token
-    const ticket = await client.verifyIdToken({
-      idToken,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const payload = ticket.getPayload();
- console.log("✅ Token verified. Payload:", payload);
-    const userInfo = {
-      name: payload.name,
-      email: payload.email,
-      googleId: payload.sub,
-    };
-
-    // Check if user exists
-    let user = await UserModel.findOne({ email: userInfo.email });
-
-    // If not, create user with no password (Google login only)
-    if (!user) {
-      user = await UserModel.create({
-        name: userInfo.name,
-        email: userInfo.email,
-        password: null,
-        isVerified: true,
-        googleId: userInfo.googleId,
-      });
-      console.log("🆕 New user created in DB:", user);
+    const { idToken } = req.body;
+    console.log("Received ID Token:", idToken?.substring(0, 50) + "...");
+    if (!idToken) {
+        console.log("No token provided");
+        return sendResponse(res, "idToken is required", 400, false);
     }
 
-    // Generate tokens
-    const tokens = await generateTokens(user);
-    const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = tokens;
+    try {
+        // Verify Google ID token
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
 
-    // Set cookies
-    setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);
+        const payload = ticket.getPayload();
+        console.log("Token verified. Payload:", payload);
+        const userInfo = {
+            name: payload.name,
+            email: payload.email,
+            googleId: payload.sub,
+        };
 
-    return sendResponse(res, "Google login successful", 200, true, {
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        roles: user.role[0],
-      },
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      access_token_exp: accessTokenExp,
-      is_auth: true,
-    });
+        // Check if user exists
+        let user = await UserModel.findOne({ email: userInfo.email });
 
-  } catch (error) {
-    console.error("Google login error:", error.message);
-    return sendResponse(res, "Invalid or expired Google token", 401, false);
-  }
+        // If not, create user with no password (Google login only)
+        if (!user) {
+            user = await UserModel.create({
+                name: userInfo.name,
+                email: userInfo.email,
+                password: null,
+                isVerified: true,
+                googleId: userInfo.googleId,
+            });
+            console.log("New user created in DB:", user);
+        }
+
+        // Generate tokens
+        const tokens = await generateTokens(user);
+        const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = tokens;
+
+        // Set cookies
+        setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);
+
+        return sendResponse(res, "Google login successful", 200, true, {
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                roles: user.role[0],
+            },
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            access_token_exp: accessTokenExp,
+            is_auth: true,
+        });
+
+    } catch (error) {
+        console.error("Google login error:", error.message);
+        return sendResponse(res, "Invalid or expired Google token", 401, false);
+    }
 };
+
+//userprofile
+exports.userProfile = async (req, res) => {
+    res.send({ "user": req.user })
+}

@@ -21,13 +21,12 @@ exports.setTokensCookies = (
       expires: accessTokenExpDate,
     });
 
-    // ✅ FIXED: Use refreshTokenExpDate instead of accessTokenExpDate
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
       path: "/",
-      expires: refreshTokenExpDate, // This was the bug!
+      expires: refreshTokenExpDate, 
     });
 
     // Set is_auth cookie (not httpOnly, accessible to JS)

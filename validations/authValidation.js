@@ -1,39 +1,34 @@
 const { z } = require("zod");
 const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
-const userRegistrationSchema =z.object({
-    name : z
+
+const userRegistrationSchema = z.object({
+  name: z
     .string()
     .min(3, " Name must be atleast 3 characters long")
-    .max(20,"name must be less than 20 characters")
+    .max(20, "name must be less than 20 characters")
     .regex(nameRegex, "Name must contain only alphabets and single spaces, no special characters or numbers"),
-   email: z
-        .string()
-        .email("Invalid email address")
-        .nonempty("Email is required"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .nonempty("Email is required"),
 
   mobile: z
-        .string()
-        .regex(/^[6-9]\d{9}$/, "Invalid mobile number")
-        .nonempty("Mobile number is required"),
+    .string()
+    .regex(/^[6-9]\d{9}$/, "Invalid mobile number")
+    .nonempty("Mobile number is required"),
 
-        
-    password: z
-        .string()
-        .min(8, "Password must be at least 8 characters long")
-        .regex(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&_])[A-Za-z\d@$!%*?#&_]{8,}$/,
-            "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
-        )
-        .nonempty("Password is required"),
-
-        
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&_])[A-Za-z\d@$!%*?#&_]{8,}$/,
+      "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
+    )
+    .nonempty("Password is required"),
 });
 
-
-
-
 const LoginFormSchema = z.object({
-email: z
+  email: z
     .string({
       required_error: "Email is required"
     })
@@ -43,11 +38,11 @@ email: z
     .string({
       required_error: "Password is required"
     })
-    // .min(8, "Password must be at least 8 characters long")
-    // .regex(
-    //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&_])[A-Za-z\d@$!%*?#&_]{8,}$/,
-    //   "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
-    // )
+  // .min(8, "Password must be at least 8 characters long")
+  // .regex(
+  //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&_])[A-Za-z\d@$!%*?#&_]{8,}$/,
+  //   "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
+  // )
 
 })
 
@@ -102,14 +97,11 @@ const verifyForgotPasswordOtpSchema = z.object({
 });
 
 module.exports = {
- // userRegistrationSchema :userRegistration,
-
-userRegistrationSchema,
+  userRegistrationSchema,
   LoginFormSchema,
   changePasswordSchema,
   forgotPasswordOtpSchema,
   verifyForgotPasswordOtpSchema
-
 };
 
 
