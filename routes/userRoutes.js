@@ -12,8 +12,10 @@ const authorizeRole = require('../middlewares/authorizeRole');
 userRouter.post('/signup', validate(userRegistrationSchema), otpLimiter, userRegistration)
 userRouter.post('/verify-otp', validate(verifyUserOtpSchema), otpLimiter, verifyTempUser)
 userRouter.post('/login', validate(LoginFormSchema), otpLimiter, userLogin)
-userRouter.post('/forgot-password-send-otp', accessTokenAutoRefresh, passport.authenticate('jwt', { session: false }), validate(forgotPasswordOtpSchema), userForgotPasswordOtpSender)
-userRouter.post('/verify-forgot-password-otp', accessTokenAutoRefresh, passport.authenticate('jwt', { session: false }), validate(verifyForgotPasswordOtpSchema), userVerifyForgotPasswordOtp)
+userRouter.post('/forgot-password-send-otp',  validate(forgotPasswordOtpSchema), userForgotPasswordOtpSender)
+///userRouter.post('/forgot-password-send-otp', validate(forgotPasswordOtpSchema), otpLimiter, userForgotPasswordOtpSender)
+///userRouter.post('/verify-forgot-password-otp',  validate(verifyForgotPasswordOtpSchema), userVerifyForgotPasswordOtp)
+userRouter.post('/verify-forgot-password-otp', validate(verifyForgotPasswordOtpSchema), otpLimiter, userVerifyForgotPasswordOtp)
 userRouter.post('/google', googleLogin);
 
 //protected routes

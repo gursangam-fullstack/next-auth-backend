@@ -31,7 +31,7 @@ exports.setTokensCookies = (
 
     // Set is_auth cookie (not httpOnly, accessible to JS)
     res.cookie("is_auth", true, {
-      httpOnly: true,
+      httpOnly: false,
       secure: false,
       sameSite: "lax",
       path: "/",

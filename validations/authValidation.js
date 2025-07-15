@@ -74,7 +74,7 @@ const forgotPasswordOtpSchema = z.object({
     .string()
     .nonempty("Email is required")
     .email("Invalid email address"),
-  otp: otpSchema,
+ /// otp: otpSchema,
 });
 
 const verifyUserOtpSchema = z.object({
